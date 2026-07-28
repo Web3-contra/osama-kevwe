@@ -359,6 +359,23 @@
   }
   .video-frame:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 44px 110px rgba(4,4,14,.7), 0 0 90px rgba(242,215,156,.3), 0 0 140px rgba(195,154,94,.2); }
  
+  .video-frame2 {
+    position: relative;
+    
+        width: 100%;
+        max-width: 800px;
+        height: 500px;
+      
+    object-fit: cover;
+     border-radius: 24px; overflow: hidden;
+    border: 1px solid rgba(216,185,140,.4);
+    box-shadow:
+      0 34px 90px rgba(4,4,14,.65),
+      0 0 70px rgba(242,215,156,.22),
+      0 0 120px rgba(195,154,94,.16);
+    transition: transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .6s;
+  }
+
   @keyframes shine { 0%, 55% { background-position: 120% 0; } 90%, 100% { background-position: -120% 0; } }
   .video-sound {
     position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 4;
@@ -385,6 +402,7 @@
   @property --ring-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
   @keyframes ringspin { to { --ring-angle: 360deg; } }
   .video-frame video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+  .video-frame2 video { width: 100%; height: 100%; object-fit: cover; background: #000; }
   
   /* ── she said yes ────────────────────────────────────── */
   .yes-section { min-height: 74svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 9vh 6vw; }
@@ -524,14 +542,14 @@
     .cg-a { grid-column: 1 / 3; grid-row: span 3; }
     .cg-b { grid-column: 1 / 2; grid-row: span 2; }
     .cg-c { grid-column: 2 / 3; grid-row: span 3; }
-    .cg-d { grid-column: 1 / 2; grid-row: span 3; }
-    .cg-e { grid-column: 2 / 3; grid-row: span 3; }
+    .cg-d { grid-column: 1 / 2; grid-row: span 2; }
+    .cg-e { grid-column: 2 / 3; grid-row: span 2; }
     .cg-f { grid-column: 1 / 2; grid-row: span 2; }
   
   .cg-g { grid-column: 2 / 3; grid-row: span 2; }
   .cg-h { grid-column: 1 / 2; grid-row: span 2; }
-  .cg-i { grid-column: 2 / 3; grid-row: span 3; }
-  .cg-j { grid-column: 1 / 2; grid-row: span 3; }
+  .cg-i { grid-column: 2 / 3; grid-row: span 2; }
+  .cg-j { grid-column: 1 / 2; grid-row: span 2; }
   .cg-k { grid-column: 2 / 3; grid-row: span 2; }
   .cg-l { grid-column: 1 / 2; grid-row: span 3; }
   .cg-m { grid-column: 2 / 3; grid-row: span 2; }
