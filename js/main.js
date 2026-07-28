@@ -210,10 +210,8 @@ document.querySelectorAll(".parallax").forEach((el) => {
 });
 
 /* ── video section: autoplay in view, tap for sound ──── */
-(() => {
-  const frame = document.getElementById("videoFrame");
-  const video = document.getElementById("proposalVideo");
-  const soundBtn = document.getElementById("videoSound");
+function initVideoSection(frame, video, soundBtn) {
+  if (!frame || !video || !soundBtn) return; // guards against a missing/renamed id
 
   gsap.set(frame, { opacity: 0, y: 80, scale: 0.92 });
   gsap.to(frame, {
@@ -256,7 +254,18 @@ document.querySelectorAll(".parallax").forEach((el) => {
     soundBtn.setAttribute("aria-label", video.muted ? "Turn sound on" : "Turn sound off");
     if (!video.muted) { video.currentTime = 0; video.play().catch(() => {}); }
   });
-})();
+}
+
+initVideoSection(
+  document.getElementById("videoFrame"),
+  document.getElementById("proposalVideo"),
+  document.getElementById("videoSound")
+);
+initVideoSection(
+  document.getElementById("videoFrame2"),
+  document.getElementById("proposalVideo2"),
+  document.getElementById("videoSound2")
+);
 
 /* ── THE YES ─────────────────────────────────────────── */
 (() => {
