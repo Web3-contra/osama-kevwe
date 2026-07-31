@@ -243,9 +243,11 @@
   }
   .hgallery-track {
     display: flex; align-items: flex-start; gap: clamp(1.4rem, 3.2vw, 2.8rem);
-    padding: calc(12vh + 20px) clamp(6vw, 10vw, 12vw) 6vh;
+    padding: calc(12vh + 20px) clamp(6vw, 10vw, 12vw) 1.5vh;
     width: max-content; will-change: transform;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
   }
+  .hgallery-track.dragging { cursor: grabbing; }
   .hcard { position: relative; flex: none; width: clamp(230px, 27vw, 380px); transform: rotate(-1.3deg); transform-origin: 50% -4px; padding: .55rem; overflow: visible; }
   .hcard.tall { width: clamp(210px, 24vw, 330px); transform: rotate(1.6deg); }
   /* one wooden clothespin per photo, centred on the rope */
@@ -266,14 +268,63 @@
   .hcard::after { display: none; }
   /* photo wrapper keeps image inside the glass frame */
   .hcard-photo { width: 100%; overflow: hidden; border-radius: 10px; }
-  .hcard-photo img { width: 100%; height: clamp(300px, 48vh, 500px); object-fit: cover; transition: transform .8s cubic-bezier(.2,.7,.2,1); display: block; border-radius: 3%; }
+  .hcard-photo img { width: 100%; height: clamp(300px, 48vh, 500px); object-fit: cover; transition: transform .8s cubic-bezier(.2,.7,.2,1); display: block; border-radius: 3%; -webkit-user-drag: none; }
   .hcard.tall .hcard-photo img { height: clamp(280px, 42vh, 440px); }
   .hcard:hover .hcard-photo img { transform: scale(1.04); }
   .hcard figcaption {
     font-family: var(--script); font-size: 1.05rem; color: rgba(242,234,217,.85); text-align: center;
     padding: .65rem .3rem .25rem;
   }
-  
+
+  /* ── slide control: drag the photos, or use the scrubber ── */
+  .hgallery-hint {
+    text-align: center; font-family: var(--sans); font-weight: 300; font-size: .58rem;
+    letter-spacing: .36em; text-transform: uppercase; color: rgba(242,234,217,.42);
+    margin: 0 0 1.6rem;
+  }
+  .hgallery-hint i { font-style: normal; color: var(--gold-soft); margin: 0 .4em; }
+  .hg-controls {
+    display: flex; align-items: center; gap: 1.1rem;
+    max-width: min(520px, 82vw); margin: 0 auto; padding: 0 6vw 7vh;
+  }
+  .hg-arrow {
+    flex: none; width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.06); border: 1px solid var(--glass-line);
+    color: var(--star); font-size: 1.25rem; line-height: 1; cursor: pointer;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: background .35s, box-shadow .35s, transform .35s, opacity .35s;
+  }
+  .hg-arrow:hover { background: rgba(242,215,156,.28); box-shadow: 0 0 22px rgba(242,215,156,.32); transform: scale(1.07); }
+  .hg-arrow:active { transform: scale(.92); }
+  .hg-arrow:disabled { opacity: .28; cursor: default; box-shadow: none; transform: none; }
+  .hg-arrow:focus-visible, .hg-scrollbar:focus-visible { outline: 1px solid var(--gold-lt); outline-offset: 3px; }
+  .hg-scrollbar {
+    position: relative; flex: 1; height: 20px; display: flex; align-items: center;
+    cursor: pointer; touch-action: none;
+  }
+  .hg-scrollbar::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 5px; transform: translateY(-50%);
+    border-radius: 999px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.1);
+  }
+  .hg-scrollbar-fill {
+    position: absolute; left: 0; top: 50%; height: 5px; transform: translateY(-50%); width: 0;
+    border-radius: 999px 0 0 999px;
+    background: linear-gradient(90deg, var(--gold-dp), var(--gold-lt));
+    opacity: .45; pointer-events: none;
+  }
+  .hg-scrollbar-thumb {
+    position: absolute; left: 0; top: 50%; width: 30%; height: 20px; border-radius: 999px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, var(--gold-lt), var(--gold));
+    box-shadow: 0 0 16px rgba(242,215,156,.5), 0 4px 10px rgba(0,0,0,.4);
+    cursor: grab;
+  }
+  .hg-scrollbar.dragging .hg-scrollbar-thumb, .hg-scrollbar-thumb:active { cursor: grabbing; box-shadow: 0 0 26px rgba(242,215,156,.7), 0 4px 12px rgba(0,0,0,.5); }
+  .hg-scrollbar-thumb::after {
+    content: ""; position: absolute; inset: 7px 10px; border-radius: 999px; background: rgba(255,255,255,.4);
+  }
+
   /* ── night collage (chapter II) ──────────────────────── */
   .collage {
     display: grid; gap: clamp(1rem, 2.2vw, 1.8rem);
@@ -383,7 +434,18 @@
     padding: .55rem 1.15rem; border-radius: 999px; cursor: pointer;
     border: 1px solid rgba(255,255,255,.35);
     background: rgba(0,0,0,.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    color: #fff; transition: background .4s, box-shadow .4s;
+    color: #fff;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease, background .4s, box-shadow .4s;
+  }
+  /* controls stay hidden until the video is hovered (desktop) or
+     tapped (touch, via the .controls-visible class toggled from main.js) */
+  .video-frame:hover .video-sound,
+  .video-frame2:hover .video-sound,
+  .video-frame.controls-visible .video-sound,
+  .video-frame2.controls-visible .video-sound,
+  .video-sound:focus-visible {
+    opacity: 1; pointer-events: auto;
   }
   .video-sound span { font-family: var(--sans); font-weight: 300; font-size: .58rem; letter-spacing: .3em; text-transform: uppercase; }
   .video-sound:hover { background: rgba(242,215,156,.35); box-shadow: 0 0 24px rgba(242,215,156,.35); }
@@ -403,6 +465,39 @@
   @keyframes ringspin { to { --ring-angle: 360deg; } }
   .video-frame video { width: 100%; height: 100%; object-fit: cover; background: #000; }
   .video-frame2 video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+
+  /* ── video play / pause toggle ───────────────────────── */
+  .video-play {
+    position: absolute; top: 50%; left: 50%; z-index: 4;
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.35);
+    color: #fff; cursor: pointer;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(4,4,14,.5);
+    opacity: 0; pointer-events: none;
+    transform: translate(-50%, -50%) scale(.9);
+    transition: opacity .35s ease, transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .4s, background .3s;
+  }
+  .video-play:hover { background: rgba(242,215,156,.32); box-shadow: 0 0 30px rgba(242,215,156,.4); }
+  .video-play:active { transform: translate(-50%, -50%) scale(.94); }
+  .video-play:focus-visible { outline: 1px solid var(--gold-lt); outline-offset: 3px; }
+  .video-play svg { width: 22px; height: 22px; }
+  .video-play .ico-play { margin-left: 3px; }
+  .video-play .ico-pause { display: none; }
+  .video-play.is-playing .ico-play { display: none; }
+  .video-play.is-playing .ico-pause { display: block; }
+  /* hidden until the video is hovered (desktop) or tapped (touch, via
+     the .controls-visible class toggled from main.js), then it fades away
+     again on its own instead of sitting on screen permanently */
+  .video-frame:hover .video-play,
+  .video-frame2:hover .video-play,
+  .video-frame.controls-visible .video-play,
+  .video-frame2.controls-visible .video-play,
+  .video-play:focus-visible {
+    opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1);
+  }
+  .video-play:hover { transform: translate(-50%, -50%) scale(1.08); }
   
   /* ── she said yes ────────────────────────────────────── */
   .yes-section { min-height: 74svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 9vh 6vw; }
@@ -607,6 +702,8 @@
     .hcard.tall { width: clamp(180px, 60vw, 260px); }
     .hcard-photo img { height: clamp(260px, 52vh, 420px); }
     .hcard.tall .hcard-photo img { height: clamp(240px, 46vh, 380px); }
+    .hg-controls { max-width: 90vw; gap: .7rem; padding: 0 5vw 6vh; }
+    .hg-arrow { width: 38px; height: 38px; font-size: 1.1rem; }
     /* video: full-bleed cover with dark overlay */
     .video-section { padding: 0; }
     .video-halo { display: none; }
